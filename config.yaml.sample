@@ -1,0 +1,26 @@
+SolanaConfig: # solana-cli config file
+ Dir: /home/yourDir/
+ MainnetPath: config-mainnet-beta.yml
+ TestnetPath: config-testnet.yml
+ DevnetPath: config-devnet.yml
+SolanaPing:
+ AlternativeEnpoint:
+  Mainnet:
+  Testnet: http://127.0.0.1 # Change to your own endpoint here
+  Devnet:
+ Clusters: # clusters to run ping
+  # - MainnetBeta
+   - Testnet
+  # - Devnet
+ PingConfig:
+  Receiver: 9qT3WeLV5o3t3GVgCk9A3mpTRjSb9qBvnfrAsVKLhmU5 # change your receive account here
+  NumWorkers: 1                 #change number of concurent run here
+  BatchCount: 1
+  BatchInverval: 1
+  TxTimeout: 75                 # timeout time
+  WaitConfirmationTimeout: 60
+  StatusCheckTime: 1
+  MinPerPingTime: 10
+  RequestUnits: 3000          # change RequestUnits 
+  ComputeUnitPrice: 1000      # change ComputeUnitPrice
+  TxLogOn: false              # to print out transcation
