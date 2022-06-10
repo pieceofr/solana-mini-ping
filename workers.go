@@ -17,65 +17,40 @@ const (
 )
 
 func launchWorkers() {
-	for _, c := range config.SolanaPing.Clusters {
-		for i := 0; i < config.PingConfig.NumWorkers; i++ {
-			go pingDataWorker(c)
-			time.Sleep(5 * time.Second)
-		}
+	// for _, c := range config.ClusterPing.Clusters {
+	// 	for i := 0; i < config.PingConfig.NumWorkers; i++ {
+	// 		go pingDataWorker(c)
+	// 		time.Sleep(5 * time.Second)
+	// 	}
 
-	}
+	// }
+	go pingDataWorker(config.Devnet)
 }
 
-func createRPCClient(cluster Cluster) (*client.Client, error) {
+func createRPCClient(config ClusterConfig) *client.Client {
 	var c *client.Client
-	switch cluster {
-	case MainnetBeta:
-		if len(config.SolanaPing.AlternativeEnpoint.Mainnet) > 0 {
-			c = client.NewClient(config.SolanaPing.AlternativeEnpoint.Mainnet)
-			log.Println(c, " use alternative endpoint:", config.SolanaPing.AlternativeEnpoint.Mainnet)
-		} else {
-			c = client.NewClient(rpc.MainnetRPCEndpoint)
-		}
-	case Testnet:
-		if len(config.SolanaPing.AlternativeEnpoint.Testnet) > 0 {
-			c = client.NewClient(config.SolanaPing.AlternativeEnpoint.Testnet)
-			log.Println(c, " use alternative endpoint:", config.SolanaPing.AlternativeEnpoint.Testnet)
-		} else {
-			c = client.NewClient(rpc.TestnetRPCEndpoint)
-		}
-	case Devnet:
-		if len(config.SolanaPing.AlternativeEnpoint.Devnet) > 0 {
-			c = client.NewClient(config.SolanaPing.AlternativeEnpoint.Devnet)
-			log.Println(c, " use alternative endpoint:", config.SolanaPing.AlternativeEnpoint.Devnet)
-		} else {
-			c = client.NewClient(rpc.DevnetRPCEndpoint)
-		}
-	default:
-		log.Fatal("Invalid Cluster")
-		return nil, InvalidCluster
+	if len(config.AlternativeEnpoint) > 0 {
+		c = client.NewClient(config.AlternativeEnpoint)
+		log.Println(c, " use alternative endpoint:", config.AlternativeEnpoint)
+	} else {
+		c = client.NewClient(rpc.TestnetRPCEndpoint)
 	}
-	return c, nil
+	return c
 }
 
-func pingDataWorker(cluster Cluster) {
-	log.Println(">> Solana DataPoint1MinWorker for ", cluster, " start!")
-	defer log.Println(">> Solana DataPoint1MinWorker for ", cluster, " end!")
-	c, err := createRPCClient(cluster)
-	if err != nil {
-		return
-	}
+func pingDataWorker(config ClusterConfig) {
+	log.Println(">> Solana DataPoint1MinWorker for ", config.Cluster, " start!")
+	defer log.Println(">> Solana DataPoint1MinWorker for ", config.Cluster, " end!")
+	c := createRPCClient(config)
 	for {
 		if c == nil {
-			c, err = createRPCClient(cluster)
-			if err != nil {
-				return
-			}
+			c = createRPCClient(config)
 		}
-		result, err := Ping(cluster, c, config.HostName, DataPoint1Min, config.SolanaPing.PingConfig)
+		result, err := Ping(c, DataPoint1Min, config)
 		if err != nil {
 			continue
 		}
-		waitTime := config.SolanaPing.PingConfig.MinPerPingTime - (result.TakeTime / 1000)
+		waitTime := config.ClusterPing.PingConfig.MinPerPingTime - (result.TakeTime / 1000)
 		if waitTime > 0 {
 			time.Sleep(time.Duration(waitTime) * time.Second)
 		}

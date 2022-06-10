@@ -99,9 +99,6 @@ func SendPingTx(param SendPingTxParam) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to new a tx, err: %v", err)
 	}
-	if config.TxLogOn {
-		log.Println("tx:", tx)
-	}
 
 	txhash, err := param.Client.SendTransaction(param.Ctx, tx)
 	if err != nil {
@@ -147,14 +144,14 @@ func waitConfirmation(c *client.Client, txHash string, timeout time.Duration, re
 }
 
 func getConfigKeyPair(cluster Cluster) (types.Account, error) {
-	var c SolanaConfig
+	var c SolanaCLIConfig
 	switch cluster {
 	case MainnetBeta:
-		c = config.SolanaConfigInfo.ConfigMain
+		c = config.ClusterCLIConfig.ConfigMain
 	case Testnet:
-		c = config.SolanaConfigInfo.ConfigTestnet
+		c = config.ClusterCLIConfig.ConfigTestnet
 	case Devnet:
-		c = config.SolanaConfigInfo.ConfigDevnet
+		c = config.ClusterCLIConfig.ConfigDevnet
 	default:
 		log.Println("StatusNotFound Error:", cluster)
 		return types.Account{}, errors.New("Invalid Cluster")

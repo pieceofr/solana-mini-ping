@@ -36,17 +36,17 @@ type PingResult struct {
 	UpdatedAt time.Time      `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP" json:"updated_at,omitempty"`
 }
 
-func Ping(cluster Cluster, c *client.Client, host string, pType PingType, config PingConfig) (PingResult, error) {
+func Ping(c *client.Client, pType PingType, config ClusterConfig) (PingResult, error) {
 	var configAcct types.Account
 	resultErrs := []string{}
 	timer := TakeTime{}
 	result := PingResult{
-		Cluster:  string(cluster),
-		Hostname: host,
+		Cluster:  string(config.Cluster),
+		Hostname: config.HostName,
 		PingType: string(pType),
 	}
 
-	configAcct, err := getConfigKeyPair(cluster)
+	configAcct, err := getConfigKeyPair(config.Cluster)
 	if err != nil {
 		result.Error = resultErrs
 		return result, err
@@ -58,7 +58,7 @@ func Ping(cluster Cluster, c *client.Client, host string, pType PingType, config
 		}
 		timer.TimerStart()
 		var hash string
-		if cluster == Testnet {
+		if config.Cluster == Testnet {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Duration(config.TxTimeout)*time.Second)
 			defer cancel()
 			hash, err = SendPingTx(SendPingTxParam{
