@@ -112,10 +112,12 @@ func loadConfig() Config {
 		}
 		c.ClusterCLIConfig.ConfigDevnet = sConfig
 	}
+	configMainnetFile := v.GetString("ClusterConfigFile.Mainnet")
+	configTestnetFile := v.GetString("ClusterConfigFile.Testnet")
+	configDevnetFile := v.GetString("ClusterConfigFile.Devnet")
 
 	// Read Each Cluster Configurations
 	// setup config.yaml for mainnet
-	configMainnetFile := v.GetString("ClusterConfigFile.Mainnet")
 	v.SetConfigName(configMainnetFile)
 	v.ReadInConfig()
 	c.Mainnet = ClusterConfig{
@@ -123,7 +125,7 @@ func loadConfig() Config {
 		HostName:    hostname,
 		ClusterPing: ReadClusterPingConfig(v),
 	}
-	configTestnetFile := v.GetString("ClusterConfigFile.Testnet")
+
 	v.SetConfigName(configTestnetFile)
 	v.ReadInConfig()
 	c.Testnet = ClusterConfig{
@@ -131,7 +133,7 @@ func loadConfig() Config {
 		HostName:    hostname,
 		ClusterPing: ReadClusterPingConfig(v),
 	}
-	configDevnetFile := v.GetString("ClusterConfigFile.Devnet")
+
 	v.SetConfigName(configDevnetFile)
 	v.ReadInConfig()
 	c.Devnet = ClusterConfig{

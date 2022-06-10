@@ -16,15 +16,28 @@ const (
 	DataPoint1Min PingType = "datapoint1min"
 )
 
-func launchWorkers() {
-	// for _, c := range config.ClusterPing.Clusters {
-	// 	for i := 0; i < config.PingConfig.NumWorkers; i++ {
-	// 		go pingDataWorker(c)
-	// 		time.Sleep(5 * time.Second)
-	// 	}
-
-	// }
-	go pingDataWorker(config.Devnet)
+func launchWorkers(c ClustersToRun) {
+	runCluster := func(clusterConf ClusterConfig) {
+		for i := 0; i < clusterConf.PingConfig.NumWorkers; i++ {
+			log.Println("	go pingDataWorker", clusterConf.Cluster, " n:", clusterConf.PingConfig.NumWorkers)
+			go pingDataWorker(clusterConf)
+			time.Sleep(2 * time.Second)
+		}
+	}
+	switch c {
+	case RunMainnetBeta:
+		runCluster(config.Mainnet)
+	case RunTestnet:
+		runCluster(config.Testnet)
+	case RunDevnet:
+		runCluster(config.Devnet)
+	case RunAllClusters:
+		runCluster(config.Mainnet)
+		runCluster(config.Testnet)
+		runCluster(config.Devnet)
+	default:
+		panic(InvalidCluster)
+	}
 }
 
 func createRPCClient(config ClusterConfig) *client.Client {
